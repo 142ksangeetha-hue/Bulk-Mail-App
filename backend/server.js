@@ -30,7 +30,9 @@ async function startServer() {
     try {
         await mongoose.connect(process.env.MONGO_URI, {
             family: 4,
-            serverSelectionTimeoutMS: 30000
+            serverSelectionTimeoutMS: 30000,
+            connectTimeoutMS: 30000,
+            socketTimeoutMS: 30000
         });
 
         console.log("MongoDB connected successfully");
@@ -39,10 +41,20 @@ async function startServer() {
             console.log(`Server running on port ${PORT}`);
         });
 
-    } catch (error) {
-        console.error("MongoDB connection error:", error.message);
-        process.exit(1);
+    } 
+     catch (error) {
+    console.error("MongoDB connection error:", error.message);
+
+    if (error.reason && error.reason.servers) {
+        for (const [server, details] of error.reason.servers) {
+            console.error("MongoDB server:", server);
+            console.error("Server type:", details.type);
+            console.error("Server error:", details.error);
+        }
     }
+
+    process.exit(1);
+}
 }
 
 startServer();
