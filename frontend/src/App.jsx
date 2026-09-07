@@ -35,8 +35,8 @@ function App() {
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
-  const API_URL = "http://localhost:5000/api/subscribers";
-  const EMAIL_API = "http://localhost:5000/api/email/send";
+  const API_URL = "https://bulk-mail-app-1kpu.onrender.com/api/subscribers";
+  const EMAIL_API = "https://bulk-mail-app-1kpu.onrender.com/api/email/send";
 
   // =========================
   // LOGIN
@@ -52,7 +52,7 @@ function App() {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/auth/login",
+        "https://bulk-mail-app-1kpu.onrender.com/api/auth/login",
         {
           method: "POST",
           headers: {
@@ -99,7 +99,7 @@ function App() {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/auth/register",
+        "https://bulk-mail-app-1kpu.onrender.com/api/auth/register",
         {
           method: "POST",
           headers: {
@@ -158,8 +158,6 @@ function App() {
     try {
       const token = localStorage.getItem("token");
 
-      if (!token) return;
-
       const response = await fetch(API_URL, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -169,7 +167,7 @@ function App() {
       const data = await response.json();
 
       if (!response.ok) {
-        console.error(data.message);
+        console.error(data);
         return;
       }
 
@@ -178,7 +176,6 @@ function App() {
       console.error("Error fetching subscribers:", error);
     }
   };
-
   useEffect(() => {
     if (isLoggedIn) {
       fetchSubscribers();
@@ -203,13 +200,7 @@ function App() {
       alert("Please enter name and email");
       return;
     }
-    const confirmed = window.confirm(
-      `Are you sure you want to send this email to ${subscribers.length} subscribers?`
-    );
-
-    if (!confirmed) {
-      return;
-    }
+   
     try {
       const url = editingId
         ? `${API_URL}/${editingId}`
@@ -274,7 +265,7 @@ function App() {
       });
 
       const data = await response.json();
-
+      console.log("Subscriber data:", data);
       if (!response.ok) {
         alert(data.message || "Delete failed");
         return;
