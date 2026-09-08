@@ -1,9 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 
 const Subscriber = require("../models/Subscriber");
 const authMiddleware = require("../middleware/authMiddleware");
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Send bulk email
 router.post("/send", authMiddleware, async (req, res) => {
@@ -16,21 +18,6 @@ router.post("/send", authMiddleware, async (req, res) => {
       });
     }
 
-    // Gmail transporter
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-      connectionTimeout: 10000,
-      greetingTimeout: 10000,
-      socketTimeout: 10000,
-    });
-
-    // Get all subscribers
     const subscribers = await Subscriber.find();
 
     if (subscribers.length === 0) {
@@ -39,10 +26,9 @@ router.post("/send", authMiddleware, async (req, res) => {
       });
     }
 
-    // Send email to each subscriber
     for (const subscriber of subscribers) {
-      await transporter.sendMail({
-        from: process.env.EMAIL_USER,
+      await resend.emails.send({
+        from: "onboarding@resend.dev",
         to: subscriber.email,
         subject: subject,
         text: message,
